@@ -538,13 +538,23 @@
             });
         });
 
-        // Storage for file links (will persist in localStorage)
+        // Predefined file links - Edit this section to add your files permanently
         let fileLinks = {
-            lectures: [],
-            notes: [],
-            slides: [],
-            exams: [],
-            exercises: []
+            lectures: [
+                // Example: { title: "Introduction to Programming", path: "lectures/intro-programming.pdf", dateAdded: "2024-01-15" }
+            ],
+            notes: [
+                // Example: { title: "Chapter 1 Notes", path: "notes/chapter1.pdf", dateAdded: "2024-01-15" }
+            ],
+            slides: [
+                // Example: { title: "Data Structures Slides", path: "slides/data-structures.pptx", dateAdded: "2024-01-15" }
+            ],
+            exams: [
+                // Example: { title: "Midterm Exam 2024", path: "exams/midterm-2024.pdf", dateAdded: "2024-01-15" }
+            ],
+            exercises: [
+                // Example: { title: "Homework Assignment 1", path: "exercises/homework1.pdf", dateAdded: "2024-01-15" }
+            ]
         };
 
         // Get the base URL for your GitHub Pages site
@@ -573,7 +583,6 @@
             };
             
             fileLinks[section].push(fileInfo);
-            saveToStorage();
             displayFileLink(section, fileInfo);
             
             // Clear inputs
@@ -581,7 +590,39 @@
             linkInput.value = '';
             
             updateFileCount(section);
-            showSuccessMessage(`${title} added successfully!`);
+            showSuccessMessage(`${title} added successfully! NOTE: This is temporary - to make it permanent, copy the generated code below.`);
+            
+            // Generate code for permanent addition
+            generatePermanentCode(section, fileInfo);
+        }
+
+        function generatePermanentCode(section, fileInfo) {
+            const codeBlock = `{ title: "${fileInfo.title}", path: "${fileInfo.path}", dateAdded: "${fileInfo.dateAdded}" }`;
+            
+            const activeSection = document.querySelector('.content-section.active');
+            let codeDisplay = activeSection.querySelector('.code-display');
+            
+            if (!codeDisplay) {
+                codeDisplay = document.createElement('div');
+                codeDisplay.className = 'code-display';
+                codeDisplay.style.cssText = `
+                    background: #f8f9fa;
+                    border: 1px solid #e9ecef;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin: 15px 0;
+                    font-family: 'Courier New', monospace;
+                    font-size: 12px;
+                    color: #495057;
+                `;
+                activeSection.appendChild(codeDisplay);
+            }
+            
+            codeDisplay.innerHTML = `
+                <strong>🔧 To make this permanent, add this line to the ${section} array in your HTML file:</strong><br><br>
+                <code style="background: #e9ecef; padding: 4px 8px; border-radius: 4px;">${codeBlock}</code><br><br>
+                <small>Find the "fileLinks.${section}" array in your HTML and add the above line inside the square brackets.</small>
+            `;
         }
 
         function displayFileLink(section, fileInfo) {
@@ -631,9 +672,8 @@
                 }
             }
             
-            saveToStorage();
             updateFileCount(section);
-            showSuccessMessage('File link removed successfully!');
+            showSuccessMessage('File link removed temporarily! To permanently remove it, delete the corresponding line from your HTML file.');
         }
 
         function updateFileCount(section) {
@@ -649,77 +689,46 @@
             }
         }
 
-        function saveToStorage() {
-            try {
-                localStorage.setItem('eduHub_fileLinks', JSON.stringify(fileLinks));
-            } catch (e) {
-                console.log('LocalStorage not available, using session storage');
-            }
-        }
-
-        function loadFromStorage() {
-            try {
-                const stored = localStorage.getItem('eduHub_fileLinks');
-                if (stored) {
-                    fileLinks = JSON.parse(stored);
-                    
-                    // Display all stored files
-                    Object.keys(fileLinks).forEach(section => {
-                        fileLinks[section].forEach(fileInfo => {
-                            displayFileLink(section, fileInfo);
-                        });
-                        updateFileCount(section);
+        function loadPredefinedFiles() {
+            // Display all predefined files from the fileLinks object
+            Object.keys(fileLinks).forEach(section => {
+                if (fileLinks[section].length > 0) {
+                    fileLinks[section].forEach(fileInfo => {
+                        // Add unique ID if not present (for older entries)
+                        if (!fileInfo.id) {
+                            fileInfo.id = Date.now() + Math.random();
+                        }
+                        displayFileLink(section, fileInfo);
                     });
+                    updateFileCount(section);
                 }
-            } catch (e) {
-                console.log('Could not load from storage');
-            }
+            });
         }
 
         function exportLinks() {
-            const dataStr = JSON.stringify(fileLinks, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            const url = URL.createObjectURL(dataBlob);
+            let output = "// Copy this code and replace the fileLinks object in your HTML file\n\n";
+            output += "let fileLinks = {\n";
+            
+            Object.keys(fileLinks).forEach(section => {
+                output += `    ${section}: [\n`;
+                fileLinks[section].forEach((file, index) => {
+                    const comma = index < fileLinks[section].length - 1 ? ',' : '';
+                    output += `        { title: "${file.title}", path: "${file.path}", dateAdded: "${file.dateAdded}" }${comma}\n`;
+                });
+                output += '    ],\n';
+            });
+            
+            output += "};";
+            
+            const blob = new Blob([output], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = 'eduhub-links-backup.json';
+            link.download = 'fileLinks-code.js';
             link.click();
             URL.revokeObjectURL(url);
-            showSuccessMessage('Links exported successfully!');
-        }
-
-        function importLinks(event) {
-            const file = event.target.files[0];
-            if (!file) return;
             
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedLinks = JSON.parse(e.target.result);
-                    fileLinks = importedLinks;
-                    
-                    // Clear existing displays
-                    Object.keys(fileLinks).forEach(section => {
-                        const fileList = document.getElementById(`${section}List`);
-                        const fileItems = fileList.querySelectorAll('.file-item');
-                        fileItems.forEach(item => item.remove());
-                    });
-                    
-                    // Display imported files
-                    Object.keys(fileLinks).forEach(section => {
-                        fileLinks[section].forEach(fileInfo => {
-                            displayFileLink(section, fileInfo);
-                        });
-                        updateFileCount(section);
-                    });
-                    
-                    saveToStorage();
-                    showSuccessMessage('Links imported successfully!');
-                } catch (err) {
-                    alert('Error importing file. Please check the file format.');
-                }
-            };
-            reader.readAsText(file);
+            showSuccessMessage('Code exported! Copy the content and replace the fileLinks object in your HTML file.');
         }
 
         function formatFileSize(bytes) {
@@ -833,7 +842,7 @@
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', () => {
-            loadFromStorage();
+            loadPredefinedFiles();
             
             const cards = document.querySelectorAll('.fact-card, .news-card, .card');
             
@@ -858,19 +867,25 @@
                 observer.observe(card);
             });
 
-            // Add backup/restore functionality to the first tab
+            // Add instructions for permanent file management
             const lecturesSection = document.getElementById('lectures');
-            const backupControls = document.createElement('div');
-            backupControls.innerHTML = `
-                <div style="margin-top: 20px; padding: 15px; background: #f8f9ff; border-radius: 10px;">
-                    <h4>📁 Backup & Restore</h4>
-                    <button onclick="exportLinks()" class="upload-btn" style="margin-right: 10px;">📤 Export Links</button>
-                    <input type="file" id="importFile" accept=".json" onchange="importLinks(event)" style="display: none;">
-                    <button onclick="document.getElementById('importFile').click()" class="upload-btn">📥 Import Links</button>
-                    <p style="font-size: 12px; color: #666; margin-top: 10px;">Export your links to backup them, or import previously saved links.</p>
+            const instructions = document.createElement('div');
+            instructions.innerHTML = `
+                <div style="margin-top: 20px; padding: 20px; background: linear-gradient(45deg, #e8f5e8, #f0f8f0); border-radius: 10px; border-left: 4px solid #4CAF50;">
+                    <h4>🔧 How to Add Files Permanently</h4>
+                    <p><strong>Quick Method:</strong> Use the form above to add files temporarily and get the code to make them permanent.</p>
+                    <p><strong>Manual Method:</strong> Edit the HTML file and add your files to the <code>fileLinks</code> object at the top of the JavaScript section.</p>
+                    <p><strong>Example:</strong></p>
+                    <code style="display: block; background: #f8f8f8; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    lectures: [<br>
+                    &nbsp;&nbsp;{ title: "Intro to Programming", path: "lectures/intro.pdf", dateAdded: "2024-01-15" },<br>
+                    &nbsp;&nbsp;{ title: "Data Structures", path: "lectures/ds.pdf", dateAdded: "2024-01-16" }<br>
+                    ]
+                    </code>
+                    <p><small>💡 Files added this way will appear for all users across all devices!</small></p>
                 </div>
             `;
-            lecturesSection.appendChild(backupControls);
+            lecturesSection.appendChild(instructions);
         });
     </script>
 </body>
