@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduHub - Teacher's Learning Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .content-section {
+            display: none;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            background: linear-gradient(45deg, #f8f9ff, #e8ecff);
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .upload-area.dragover {
+            background: #e8f4ff;
+            border-color: #2196F3;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: linear-gradient(45deg, #f8f9ff, #fff);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        .quiz-container {
+            background: linear-gradient(45deg, #fff9e6, #fff);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .question {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .quiz-option.selected {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .quiz-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .fact-card, .news-card {
+            background: linear-gradient(45deg, #fff, #f8f9ff);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .fact-card:hover, .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .fact-title, .news-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .success-message {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .error-message {
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .content-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 EduHub</h1>
+            <p>Your Complete Teaching & Learning Platform</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" data-tab="lectures">📚 Lectures</button>
+            <button class="tab-btn" data-tab="notes">📝 Notes</button>
+            <button class="tab-btn" data-tab="slides">🖼️ Slides</button>
+            <button class="tab-btn" data-tab="exams">📋 Exams</button>
+            <button class="tab-btn" data-tab="exercises">💪 Exercises</button>
+            <button class="tab-btn" data-tab="quiz">🧠 Daily Quiz</button>
+            <button class="tab-btn" data-tab="facts">💡 Fun Facts</button>
+            <button class="tab-btn" data-tab="news">📰 Tech News</button>
+        </div>
+
+        <!-- Lectures Section -->
+        <div class="content-section active" id="lectures">
+            <h2>📚 Upload Lectures</h2>
+            <div class="upload-area" id="lectureUpload">
+                <div class="upload-icon">📚</div>
+                <h3>Upload Lecture Files</h3>
+                <p>Drag and drop files here or click to browse</p>
+                <input type="file" class="file-input" id="lectureInput" multiple accept=".pdf,.ppt,.pptx,.doc,.docx,.mp4,.mp3">
+                <button class="upload-btn" onclick="document.getElementById('lectureInput').click()">Choose Files</button>
+            </div>
+            <div class="file-list" id="lectureList"></div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="content-section" id="notes">
+            <h2>📝 Upload Notes</h2>
+            <div class="upload-area" id="notesUpload">
+                <div class="upload-icon">📝</div>
+                <h3>Upload Notes</h3>
+                <p>Share your study notes with students</p>
+                <input type="file" class="file-input" id="notesInput" multiple accept=".pdf,.doc,.docx,.txt">
+                <button class="upload-btn" onclick="document.getElementById('notesInput').click()">Choose Files</button>
+            </div>
+            <div class="file-list" id="notesList"></div>
+        </div>
+
+        <!-- Slides Section -->
+        <div class="content-section" id="slides">
+            <h2>🖼️ Upload Slides</h2>
+            <div class="upload-area" id="slidesUpload">
+                <div class="upload-icon">🖼️</div>
+                <h3>Upload Presentation Slides</h3>
+                <p>PowerPoint, Google Slides, or PDF presentations</p>
+                <input type="file" class="file-input" id="slidesInput" multiple accept=".pdf,.ppt,.pptx">
+                <button class="upload-btn" onclick="document.getElementById('slidesInput').click()">Choose Files</button>
+            </div>
+            <div class="file-list" id="slidesList"></div>
+        </div>
+
+        <!-- Exams Section -->
+        <div class="content-section" id="exams">
+            <h2>📋 Upload Exams</h2>
+            <div class="upload-area" id="examsUpload">
+                <div class="upload-icon">📋</div>
+                <h3>Upload Exam Papers</h3>
+                <p>Past papers, mock tests, and exam materials</p>
+                <input type="file" class="file-input" id="examsInput" multiple accept=".pdf,.doc,.docx">
+                <button class="upload-btn" onclick="document.getElementById('examsInput').click()">Choose Files</button>
+            </div>
+            <div class="file-list" id="examsList"></div>
+        </div>
+
+        <!-- Exercises Section -->
+        <div class="content-section" id="exercises">
+            <h2>💪 Upload Exercises</h2>
+            <div class="upload-area" id="exercisesUpload">
+                <div class="upload-icon">💪</div>
+                <h3>Upload Practice Exercises</h3>
+                <p>Homework, assignments, and practice problems</p>
+                <input type="file" class="file-input" id="exercisesInput" multiple accept=".pdf,.doc,.docx">
+                <button class="upload-btn" onclick="document.getElementById('exercisesInput').click()">Choose Files</button>
+            </div>
+            <div class="file-list" id="exercisesList"></div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="content-section" id="quiz">
+            <h2>🧠 Daily Quiz</h2>
+            <div class="quiz-container">
+                <div class="question" id="quizQuestion">What is the fundamental unit of computer memory?</div>
+                <div class="quiz-options" id="quizOptions">
+                    <div class="quiz-option" data-answer="0">Bit</div>
+                    <div class="quiz-option" data-answer="1">Byte</div>
+                    <div class="quiz-option" data-answer="2">Kilobyte</div>
+                    <div class="quiz-option" data-answer="3">Megabyte</div>
+                </div>
+                <button class="quiz-btn" onclick="checkAnswer()">Submit Answer</button>
+                <button class="quiz-btn" onclick="nextQuestion()" style="background: linear-gradient(45deg, #667eea, #764ba2); margin-left: 10px;">Next Question</button>
+                <div id="quizResult"></div>
+            </div>
+        </div>
+
+        <!-- Facts Section -->
+        <div class="content-section" id="facts">
+            <h2>💡 Interesting Facts</h2>
+            <div class="grid">
+                <div class="fact-card">
+                    <div class="fact-title">🧠 Brain Power</div>
+                    <p>The human brain contains approximately 86 billion neurons, each connected to thousands of others, creating trillions of neural connections!</p>
+                </div>
+                <div class="fact-card">
+                    <div class="fact-title">🌌 Space Wonder</div>
+                    <p>One day on Venus is longer than one year on Venus! It takes 243 Earth days to rotate once, but only 225 Earth days to orbit the Sun.</p>
+                </div>
+                <div class="fact-card">
+                    <div class="fact-title">🐙 Ocean Mystery</div>
+                    <p>Octopuses have three hearts and blue blood! Two hearts pump blood to their gills, while the third pumps blood to the rest of their body.</p>
+                </div>
+                <div class="fact-card">
+                    <div class="fact-title">💻 Tech History</div>
+                    <p>The first computer bug was an actual bug! In 1947, Grace Hopper found a moth stuck in a computer relay, coining the term "computer bug."</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- News Section -->
+        <div class="content-section" id="news">
+            <h2>📰 Latest Tech News</h2>
+            <div class="grid">
+                <div class="news-card">
+                    <div class="news-title">🚀 AI Breakthrough</div>
+                    <p><strong>Quantum AI Computing:</strong> Researchers have achieved a new milestone in quantum computing, potentially revolutionizing machine learning algorithms and data processing speeds.</p>
+                </div>
+                <div class="news-card">
+                    <div class="news-title">🌱 Green Technology</div>
+                    <p><strong>Sustainable Computing:</strong> New energy-efficient processors reduce power consumption by 40%, making data centers more environmentally friendly.</p>
+                </div>
+                <div class="news-card">
+                    <div class="news-title">🔒 Cybersecurity Update</div>
+                    <p><strong>Enhanced Protection:</strong> Advanced encryption methods using quantum-resistant algorithms are being implemented across major platforms.</p>
+                </div>
+                <div class="news-card">
+                    <div class="news-title">📱 Mobile Innovation</div>
+                    <p><strong>Next-Gen Displays:</strong> Flexible screen technology enables foldable devices with unprecedented durability and image quality.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and sections
+                tabBtns.forEach(b => b.classList.remove('active'));
+                contentSections.forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding section
+                btn.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+            });
+        });
+
+        // File upload functionality
+        const fileInputs = ['lecture', 'notes', 'slides', 'exams', 'exercises'];
+        
+        fileInputs.forEach(type => {
+            const input = document.getElementById(`${type}Input`);
+            const uploadArea = document.getElementById(`${type}Upload`);
+            const fileList = document.getElementById(`${type}List`);
+            
+            // Click to upload
+            uploadArea.addEventListener('click', (e) => {
+                if (e.target.classList.contains('upload-btn') || e.target === uploadArea) {
+                    input.click();
+                }
+            });
+            
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files, type, fileList);
+            });
+            
+            // File input change
+            input.addEventListener('change', (e) => {
+                handleFiles(e.target.files, type, fileList);
+            });
+        });
+
+        function handleFiles(files, type, fileList) {
+            Array.from(files).forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>📄 ${file.name} (${formatFileSize(file.size)})</span>
+                    <button onclick="this.parentElement.remove()" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Remove</button>
+                `;
+                fileList.appendChild(fileItem);
+            });
+            
+            showSuccessMessage(`${files.length} file(s) uploaded successfully!`);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showSuccessMessage(message) {
+            const activeSection = document.querySelector('.content-section.active');
+            let successMsg = activeSection.querySelector('.success-message');
+            
+            if (!successMsg) {
+                successMsg = document.createElement('div');
+                successMsg.className = 'success-message';
+                activeSection.appendChild(successMsg);
+            }
+            
+            successMsg.textContent = message;
+            successMsg.style.display = 'block';
+            
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 3000);
+        }
+
+        // Quiz functionality
+        const quizQuestions = [
+            {
+                question: "What is the fundamental unit of computer memory?",
+                options: ["Bit", "Byte", "Kilobyte", "Megabyte"],
+                correct: 0
+            },
+            {
+                question: "Which programming language is known as the 'mother of all languages'?",
+                options: ["Python", "Java", "C", "Assembly"],
+                correct: 2
+            },
+            {
+                question: "What does HTML stand for?",
+                options: ["High Tech Modern Language", "HyperText Markup Language", "Home Tool Markup Language", "Hyperlink and Text Markup Language"],
+                correct: 1
+            },
+            {
+                question: "Which data structure follows LIFO (Last In, First Out) principle?",
+                options: ["Queue", "Array", "Stack", "Tree"],
+                correct: 2
+            },
+            {
+                question: "What is the time complexity of binary search?",
+                options: ["O(n)", "O(log n)", "O(n²)", "O(1)"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let selectedAnswer = -1;
+
+        function loadQuestion() {
+            const question = quizQuestions[currentQuestionIndex];
+            document.getElementById('quizQuestion').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('quizOptions');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'quiz-option';
+                optionDiv.setAttribute('data-answer', index);
+                optionDiv.textContent = option;
+                optionDiv.addEventListener('click', () => selectAnswer(index));
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            document.getElementById('quizResult').innerHTML = '';
+        }
+
+        function selectAnswer(answerIndex) {
+            selectedAnswer = answerIndex;
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[answerIndex].classList.add('selected');
+        }
+
+        function checkAnswer() {
+            if (selectedAnswer === -1) {
+                alert('Please select an answer!');
+                return;
+            }
+            
+            const question = quizQuestions[currentQuestionIndex];
+            const resultDiv = document.getElementById('quizResult');
+            
+            if (selectedAnswer === question.correct) {
+                resultDiv.innerHTML = '<div style="color: #28a745; font-weight: bold; margin-top: 15px;">🎉 Correct! Well done!</div>';
+            } else {
+                resultDiv.innerHTML = `<div style="color: #dc3545; font-weight: bold; margin-top: 15px;">❌ Incorrect. The correct answer is: ${question.options[question.correct]}</div>`;
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex = (currentQuestionIndex + 1) % quizQuestions.length;
+            selectedAnswer = -1;
+            loadQuestion();
+        }
+
+        // Initialize quiz
+        loadQuestion();
+
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.fact-card, .news-card, .card');
+            
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>
